@@ -9,6 +9,8 @@
 
 [Link to paper on ArXiv](https://arxiv.org/abs/2104.02538)
 
+<img src="assets/method.png" alt="Method overview">
+
 ## ✏️ 📄 Citation
 
 If you find our work useful or interesting, please cite our paper:
@@ -26,8 +28,6 @@ If you find our work useful or interesting, please cite our paper:
   organization={IEEE}
 }
 ```
-
-<img src="assets/method.png" alt="Method overview">
 
 ## 🤝 Acknowledgements
 
