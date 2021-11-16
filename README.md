@@ -9,10 +9,34 @@
 
 [Link to paper on ArXiv](https://arxiv.org/abs/2104.02538)
 
+## ✏️ 📄 Citation
+
+If you find our work useful or interesting, please cite our paper:
+
+```latex
+@inproceedings{turkoglu2021visual,
+  title={{Visual Camera Re-Localization Using Graph Neural Networks and Relative Pose Supervision}},
+  author={T{\"{u}}rko\u{g}lu, Mehmet {\"{O}}zg{\"{u}}r and 
+          Brachmann, Eric and 
+          Schindler, Konrad and 
+          Brostow, Gabriel and 
+          Monszpart, \'{A}ron},
+  booktitle={International Conference on 3D Vision ({3DV})},
+  year={2021},
+  organization={IEEE}
+}
+```
+
 <img src="assets/method.png" alt="Method overview">
 
-## Acknowledgements
+## 🤝 Acknowledgements
 
 We would like to thank Galen Han for his extensive help with this project.  
 We also thank Qunjie Zhou, Luwei Yang, Dominik Winkelbauer, Torsten Sattler, and Soham Saha 
 for their help and advice with baselines.
+
+## 👩‍⚖️ License
+
+Copyright © Niantic, Inc. 2021.  
+Patent Pending.  
+All rights reserved. 
