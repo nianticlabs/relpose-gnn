@@ -1,2 +1,0 @@
-class GraphStructure:
-    FC = 'fc'
