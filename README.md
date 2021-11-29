@@ -36,7 +36,8 @@ applied at training time.
         <td>Chess</td>
         <td align="center">
             <a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/videos/chess_7scenes.mp4">
-                <img src="assets/chess_7scenes_05s.046frames_56colors_1000ms.gif" height="224"/>
+                <!--<img src="assets/chess_7scenes_05s.046frames_56colors_1000ms.gif" height="224"/>-->
+                <img src="https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/chess_7scenes_05s.046frames_56colors_1000ms.gif" height="224" />
             </a><br />
             pred. poses:<a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/predictions/relpose_gnn__multi_39_chess_0.09_2.9.npz">
               relpose_gnn__multi_39_chess_0.09_2.9.npz
@@ -47,7 +48,8 @@ applied at training time.
         <td>Fire</td>
         <td align="center">
             <a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/videos/fire_7scenes.mp4">
-                <img src="assets/fire_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>
+                <!--<img src="assets/fire_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>-->
+                <img src="https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/fire_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>
             </a><br />
             pred. poses:<a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/predictions/relpose_gnn__multi_39_fire_0.23_7.4.npz">
               relpose_gnn__multi_39_fire_0.23_7.4.npz
@@ -58,7 +60,8 @@ applied at training time.
         <td>Heads</td>
         <td align="center">
             <a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/videos/heads_7scenes.mp4">
-                <img src="assets/heads_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>
+                <!--<img src="assets/heads_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>-->
+                <img src="https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/heads_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>                
             </a><br />
             pred. poses:<a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/predictions/relpose_gnn__multi_39_heads_0.13_8.5.npz">
               relpose_gnn__multi_39_heads_0.13_8.5.npz
@@ -69,7 +72,8 @@ applied at training time.
         <td>Office</td>
         <td align="center">
             <a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/videos/office_7scenes.mp4">
-                <img src="assets/office_7scenes_05s.048frames_56colors_1000ms.gif" height="224"/>
+                <!--<img src="assets/office_7scenes_05s.048frames_56colors_1000ms.gif" height="224"/>-->
+                <img src="https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/office_7scenes_05s.048frames_56colors_1000ms.gif" height="224"/>                
             </a><br />
             pred. poses:<a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/predictions/relpose_gnn__multi_39_office_0.15_4.1.npz">
               relpose_gnn__multi_39_office_0.15_4.1.npz
@@ -80,7 +84,8 @@ applied at training time.
         <td>Pumpkin</td>
         <td align="center">
             <a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/videos/pumpkin_7scenes.mp4">
-                <img src="assets/pumpkin_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>
+                <!--<img src="assets/pumpkin_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>-->
+                <img src="https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/pumpkin_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>
             </a><br />
             pred. poses:<a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/predictions/relpose_gnn__multi_39_pumpkin_0.17_3.3.npz">
               relpose_gnn__multi_39_pumpkin_0.17_3.3.npz
@@ -91,7 +96,8 @@ applied at training time.
         <td>Kitchen</td>
         <td align="center">
             <a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/videos/redkitchen_7scenes.mp4">
-                <img src="assets/redkitchen_7scenes_05s.060frames_56colors_1000ms.gif" height="224"/>
+                <!--<img src="assets/redkitchen_7scenes_05s.060frames_56colors_1000ms.gif" height="224"/>-->
+                <img src="https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/redkitchen_7scenes_05s.060frames_56colors_1000ms.gif" height="224"/>
             </a><br />
             pred. poses:<a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/predictions/relpose_gnn__multi_39_redkitchen_0.20_3.6.npz">
               relpose_gnn__multi_39_redkitchen_0.20_3.6.npz
@@ -102,7 +108,8 @@ applied at training time.
         <td>Stairs</td>
         <td align="center">
             <a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/videos/stairs_7scenes.mp4">
-                <img src="assets/stairs_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>
+                <!--<img src="assets/stairs_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>-->
+                <img src="https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/stairs_7scenes_05s.050frames_56colors_1000ms.gif" height="224"/>
             </a><br />
             pred. poses:<a href="https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/predictions/relpose_gnn__multi_39_stairs_0.23_6.4.npz">
               relpose_gnn__multi_39_stairs_0.23_6.4.npz
