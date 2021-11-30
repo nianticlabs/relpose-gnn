@@ -305,7 +305,6 @@ the dataloaders, and not have to run NN search during training.
    ```
 2. Evaluate on each 7scenes test scene 
    ```shell
-   conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
       python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
         --dataset-dir "${SEVENSCENES}" \
@@ -323,7 +322,6 @@ the dataloaders, and not have to run NN search during training.
 
 4. Evaluate each model on a corresponding remaining scene
    ```shell
-   conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
       python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
         --dataset-dir "${SEVENSCENES}" \
@@ -336,22 +334,20 @@ the dataloaders, and not have to run NN search during training.
    ```
 
 ### Train yourself
-1. 7 scenes training (Table 1 in the paper)
+1. 7 scenes training (Table 1. in the paper)
     ```shell
-    conda activate relpose_gnn
     python -u ${RELPOSEGNN}/python/niantic/training/train.py \
-    --dataset-dir "${SEVENSCENES}" \
-    --train-data-dir "${SEVENSCENESRW}" \
-    --test-data-dir "${SEVENSCENESRW}" \
-    --save-dir "${DATADIR}" \
-    --gpu 0 \
-    --experiment 0 \
-    --test-scene multi
+      --dataset-dir "${SEVENSCENES}" \
+      --train-data-dir "${SEVENSCENESRW}" \
+      --test-data-dir "${SEVENSCENESRW}" \
+      --save-dir "${DATADIR}" \
+      --gpu 0 \
+      --experiment 0 \
+      --test-scene multi
     ````
 
-2. 6 scenes training (Table 2 in the paper)
+2. 6 scenes training (Table 2. in the paper)
    ```shell
-   conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
       python -u ${RELPOSEGNN}/python/niantic/training/train.py \
         --dataset-dir "${SEVENSCENES}" \
@@ -363,9 +359,8 @@ the dataloaders, and not have to run NN search during training.
         --test-scene "${SCENE}"
    done
 
-3. Single scene training (Table 1 in the supp.)
+3. Single scene training (Table 1. in the supp.)
    ```shell
-   conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
       python -u ${RELPOSEGNN}/python/niantic/training/train.py \
         --dataset-dir "${SEVENSCENES}" \
