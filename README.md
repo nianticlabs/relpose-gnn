@@ -224,13 +224,13 @@ Comming soon...
 
 #### Pre-trained
 
-1. Download pre-trained model
+1. Download pre-trained model trained with entire 7-Scenes training scenes (Table 1 in the paper)
    ```shell
    wget \
     -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/models/relpose_gnn__multi_39.pth.tar" \
     -O "${DATADIR}/relpose_gnn__multi_39.pth.tar"
    ```
-2. Evaluate on each 7scenes scene
+2. Evaluate on each 7scenes test scene 
    ```shell
    conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
@@ -238,6 +238,22 @@ Comming soon...
         --dataset-dir "${SEVENSCENES}" \
         --test-data-dir "${SEVENSCENESRW}" \
         --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
+        --save-dir "${DATADIR}" \
+        --gpu 0 \
+        --test-scene "${SCENE}"
+   done
+   ```
+
+3. Download pre-trained models trained with 7-Scenes' 6 traing scenes (Table 2 in the paper)
+    comming soon
+4. Evaluate each model on a correponding remaining scene
+   ```shell
+   conda activate relpose_gnn
+   for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+      python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+        --dataset-dir "${SEVENSCENES}" \
+        --test-data-dir "${SEVENSCENESRW}" \
+        --weights "${DATADIR}/relpose_gnn__generalization_${SCENE}_39.pth.tar" \
         --save-dir "${DATADIR}" \
         --gpu 0 \
         --test-scene "${SCENE}"
