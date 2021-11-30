@@ -248,12 +248,12 @@ Comming soon...
 1. 7 scenes trainig (Table 1 in the paper)
     ```shell
     conda activate relpose_gnn
-          python -u ${RELPOSEGNN}/python/niantic/training/train.py \
-        --dataset-dir "${SEVENSCENES}" \
-        --test-data-dir "${SEVENSCENESRW}" \
-        --save-dir "${DATADIR}" \
-        --gpu 0 \
-        --test-scene "${SCENE}"
+    python -u ${RELPOSEGNN}/python/niantic/training/train.py \
+    --dataset-dir "${SEVENSCENES}" \
+    --test-data-dir "${SEVENSCENESRW}" \
+    --save-dir "${DATADIR}" \
+    --gpu 0 \
+    --test-scene "${SCENE}"
     ````
 
 2. 6 scenes trainig (Table 2 in the paper)
