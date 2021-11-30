@@ -248,10 +248,9 @@ Comming soon...
 1. 7 scenes trainig (Table 1 in the paper)
     ```shell
     conda activate relpose_gnn
-          python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+          python -u ${RELPOSEGNN}/python/niantic/training/train.py \
         --dataset-dir "${SEVENSCENES}" \
         --test-data-dir "${SEVENSCENESRW}" \
-        --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
         --save-dir "${DATADIR}" \
         --gpu 0 \
         --test-scene "${SCENE}"
@@ -261,10 +260,9 @@ Comming soon...
    ```shell
    conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
-      python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+      python -u ${RELPOSEGNN}/python/niantic/training/train.py \
         --dataset-dir "${SEVENSCENES}" \
         --test-data-dir "${SEVENSCENESRW}" \
-        --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
         --save-dir "${DATADIR}" \
         --gpu 0 \
         --test-scene "${SCENE}"
@@ -274,10 +272,9 @@ Comming soon...
    ```shell
    conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
-      python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+      python -u ${RELPOSEGNN}/python/niantic/training/train.py \
         --dataset-dir "${SEVENSCENES}" \
         --test-data-dir "${SEVENSCENESRW}" \
-        --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
         --save-dir "${DATADIR}" \
         --gpu 0 \
         --test-scene "${SCENE}"
