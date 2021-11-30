@@ -218,7 +218,10 @@ export PYTHONPATH="${RELPOSEGNN}:${RELPOSEGNN}/python:${PYTHONPATH}"
    
 #### Generate yourself
 
-Coming soon...
+1. 7-Scenes traininig
+```shell
+CUDA_VISIBLE_DEVICES=0 python python/niantic/training/train_7Scenes.py --experiment 0 --test_scene multi --seed 400
+````
    
 ### Evaluation
 
