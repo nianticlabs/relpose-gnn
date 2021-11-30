@@ -245,7 +245,7 @@ Comming soon...
    ```
 
 ### Train yourself
-1. 7 scenes trainig (Table 1 in the paper)
+1. 7 scenes training (Table 1 in the paper)
     ```shell
     conda activate relpose_gnn
     python -u ${RELPOSEGNN}/python/niantic/training/train.py \
@@ -258,7 +258,7 @@ Comming soon...
     --test-scene multi
     ````
 
-2. 6 scenes trainig (Table 2 in the paper)
+2. 6 scenes training (Table 2 in the paper)
    ```shell
    conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
@@ -272,7 +272,7 @@ Comming soon...
         --test-scene "${SCENE}"
    done
 
-3. Single scene trainig (Table 1 in the supp.)
+3. Single scene training (Table 1 in the supp.)
    ```shell
    conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
