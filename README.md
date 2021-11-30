@@ -301,7 +301,7 @@ Comming soon...
         --save-dir "${DATADIR}" \
         --gpu 0 \
         --experiment 2 \
-        --train_scene "${SCENE}" \
+        --train-scene "${SCENE}" \
         --test-scene "${SCENE}" \
         --max-epoch 100
    done
