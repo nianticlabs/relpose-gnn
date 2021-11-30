@@ -143,8 +143,8 @@ If you find our work useful or interesting, please cite our paper:
 ### Source code
 
 ```shell
-export RELPOSEGNN="${USER}/relpose_gnn" 
-git clone --recurse-submodules --depth 1 https://github.com/nianticlabs/relpose_gnn.git ${RELPOSEGNN}
+export RELPOSEGNN="${HOME}/relpose_gnn" 
+git clone --recurse-submodules --depth 1 https://github.com/nianticlabs/relpose-gnn.git ${RELPOSEGNN}
 ```
 
 ### Setup
