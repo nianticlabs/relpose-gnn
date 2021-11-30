@@ -247,7 +247,14 @@ Comming soon...
 ### Train yourself
 1. 7 scenes trainig (Table 1 in the paper)
     ```shell
-    python python/niantic/training/train_7Scenes.py --experiment 0 --test_scene multi --seed 400
+    conda activate relpose_gnn
+          python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+        --dataset-dir "${SEVENSCENES}" \
+        --test-data-dir "${SEVENSCENESRW}" \
+        --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
+        --save-dir "${DATADIR}" \
+        --gpu 0 \
+        --test-scene "${SCENE}"
     ````
 
 2. 6 scenes trainig (Table 2 in the paper)
