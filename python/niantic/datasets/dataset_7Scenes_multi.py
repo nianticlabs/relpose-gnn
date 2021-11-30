@@ -35,7 +35,7 @@ class SEVEN_SCENES_multi(Dataset):
                  seqs=('heads',), train=True, seq_len=8, graph_structure='fc',
                  DATA_PATH=None,
                  DATA_PATH_IR=None,
-                 GT_PATH= './GT/7Scenes',
+                 GT_PATH= 'data/7scenes',
                  fps_sub=1,
                  database_set='train',
                  sampling_period=5,
@@ -163,7 +163,7 @@ class SEVEN_SCENES_multi(Dataset):
                                               std=(0.229, 0.224, 0.225))
 
         # load dataset
-        scene_set = SevenSceneManualDataset(base_dir=self.DATA_PATH_IR,
+        scene_set = SevenSceneManualDataset(base_dir=self.DATA_PATH,
                                             seq_frame_list=frames,
                                             transform=transform_func,
                                             fill_depth_holes=False,
@@ -204,7 +204,7 @@ class SEVEN_SCENES_multi(Dataset):
 
         transform_func = transforms.Normalize(mean=(0.485, 0.456, 0.406),
                                               std=(0.229, 0.224, 0.225))
-        q_set = SevenSceneManualDataset(base_dir=self.DATA_PATH_IR,
+        q_set = SevenSceneManualDataset(base_dir=self.DATA_PATH,
                                         seq_frame_list=[q_frame],
                                         transform=transform_func,
                                         fill_depth_holes=False,
@@ -477,7 +477,7 @@ def main(argv):
     parser.add_argument('--data-path', type=Path,
                         default='/home/pf/pfstaff/projects/ozgur_poseGraph/datasets/7Scenes',
                         help='Where is the 7Scenes data stored')
-    parser.add_argument('--device', type=int, default=0, help='GPU device ID. Default: 0.')
+    parser.add_argument('--gpu', type=int, default=0, help='GPU device ID. Default: 0.')
     parser.add_argument(
         '--num-workers', type=int, help='Number of dataloader workers', default=8)
     args = parser.parse_args(argv)
@@ -490,10 +490,10 @@ def main(argv):
     if args.mode == 'train':
         dataset = SEVEN_SCENES_multi(
             args.graph_data_path / f'{args.scene_name}_fc{args.seq_len}_sp{args.sampling_period}_train',
-            GT_PATH=PATH_PROJECT / 'GT' / '7Scenes',
+            GT_PATH=PATH_PROJECT / 'data' / '7scenes',
             DATA_PATH=args.data_path,
-            DATA_PATH_IR=args.data_path,
-            device_id=args.device,
+            DATA_PATH_IR=args.graph_data_path,
+            device_id=args.gpu,
             seqs=seq, train=True,
             retrieval_mode=args.sampling_method,
             cross_connect = args.cross_connect,
@@ -503,10 +503,10 @@ def main(argv):
     else:
         dataset = SEVEN_SCENES_multi(
             args.graph_data_path / f'{args.scene_name}_fc{args.seq_len}_sp{args.sampling_period}_test',
-            GT_PATH=PATH_PROJECT / 'GT' / '7Scenes',
+            GT_PATH=PATH_PROJECT / 'data' / '7scenes',
             DATA_PATH = args.data_path,
-            DATA_PATH_IR=args.data_path,
-            device_id=args.device,
+            DATA_PATH_IR=args.graph_data_path,
+            device_id=args.gpu,
             seqs=seq, train=False,
             retrieval_mode=args.sampling_method,
             cross_connect=args.cross_connect,
@@ -517,46 +517,6 @@ def main(argv):
 
     print('dataset size: ', len(dataset))
     logger.info('dataset size: ', len(dataset))
-
-    # # -------------------------Visualize the graph--------------------------
-    #from torch_geometric.utils.convert import to_networkx
-
-    #data = dataset[0]
-    #graph = to_networkx(data)
-    #node_labels = data.y[list(graph.nodes)].numpy()
-
-    # plt.figure(1, figsize=(14, 12))
-    # nx.draw(graph, cmap=plt.get_cmap('Set1'), node_size=75, linewidths=6)
-    # plt.show()
-    #
-    ##---------------------- Visualize images from subgraphs----------------------
-    # for batch_idx, data in enumerate(tqdm(loader)):
-    #     with torch.cuda.device(args.device):
-    #         with torch.no_grad():
-    #             imgs = data.x
-    #             imgs = imgs.view(imgs.size(0), 3, 256,-1).contiguous()
-    #             fig = plt.figure(figsize=(50, 10))
-    #             for j in range(1,imgs.shape[0]+1):
-    #                 cue_img = imgs[j-1].permute(1, 2, 0).cpu().numpy()
-    #                 cue_img = (cue_img - np.min(cue_img))
-    #                 cue_img = cue_img / np.max(cue_img)
-    #                 fig.add_subplot(1, imgs.shape[0]+1, j)
-    #                 plt.imshow(cue_img)
-    #             plt.show()
-    #             plt.close()
-    #
-    #             if batch_idx > 2:
-    #                 break
-    #
-    # data = dataset[1]
-    # imgs = data.x
-    # imgs = imgs.view(imgs.size(0), 3, 256, -1).contiguous()
-    # cue_img = imgs[0].permute(1, 2, 0).cpu().numpy()
-    # cue_img = (cue_img - np.min(cue_img))
-    # cue_img = cue_img / np.max(cue_img)
-    # plt.imshow(cue_img)
-    # plt.show()
-    # plt.close()
 
 
 if __name__ == '__main__':

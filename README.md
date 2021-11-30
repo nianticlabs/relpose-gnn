@@ -176,7 +176,7 @@ export SEVENSCENESRW="${DATADIR}/7scenes-rw"
 export PYTHONPATH="${RELPOSEGNN}:${RELPOSEGNN}/python:${PYTHONPATH}"
 ```
 
-### Prepare the 7-Scenes dataset
+### I. Prepare the 7-Scenes dataset
 
 1. Download
 
@@ -195,19 +195,51 @@ export PYTHONPATH="${RELPOSEGNN}:${RELPOSEGNN}/python:${PYTHONPATH}"
     find "${SEVENSCENES}" -mindepth 2 -name "*.zip" | xargs -P 7 -I fileName sh -c 'unzip -o -d "$(dirname "fileName")" "fileName"'
     ```
 
-### Image retrieval graphs
+### II. Image retrieval
+
+For graph construction we incorporate the NetVLAD image retrieval CNN model.
+It is based on this repository: https://github.com/sfu-gruvi-3dv/sanet_relocal_demo.
+You'll need preprocessed `.bin` files (`train_frames.bin`, `test_frames.bin`) for each scene.
+
+#### Pre-processed
+
+   Coming soon...
+
+#### Generate yourself
+
+   ```shell
+   for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+     python python/external/sanet_relocal_demo/seq_data/seven_scenes/scenes2seq.py \
+       "${SEVENSCENES}/${SCENE}" \
+       --dst-dir "${SEVENSCENESRW}/${SCENE}"
+   done
+   ```
+
+### III. Graph generation
+
+Before starting training the model, train and test graphs should be generated to speed up
+the dataloaders, and not have to run NN search during training.
 
 #### Pre-processed
 
 1. Download
-
-    ```shell
-    mkdir -p "${SEVENSCENESRW}" || (mkdir -p "${SEVENSCENESRW}" && chmod go+w -R "${SEVENSCENESRW}")
-    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
-      wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp5_test.tar" \
-           -O "${SEVENSCENESRW}/${SCENE}_fc8_sp5_test.tar"
-    done
-    ```
+ 
+    - Test
+       ```shell
+       mkdir -p "${SEVENSCENESRW}" || (mkdir -p "${SEVENSCENESRW}" && chmod go+w -R "${SEVENSCENESRW}")
+       for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+         wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp5_test.tar" \
+              -O "${SEVENSCENESRW}/${SCENE}_fc8_sp5_test.tar"
+       done
+       ```
+      
+   - Train
+      ```shell
+      for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+        wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp5_train.tar" \
+             -O "${SEVENSCENESRW}/${SCENE}_fc8_sp5_train.tar"
+      done
+      ```
 
 2. Extract
 
@@ -215,10 +247,51 @@ export PYTHONPATH="${RELPOSEGNN}:${RELPOSEGNN}/python:${PYTHONPATH}"
     (cd "${SEVENSCENESRW}"; \
      find "${SEVENSCENESRW}" -mindepth 1 -maxdepth 1 -name "*.tar" | xargs -P 7 -I fileName sh -c 'tar -I pigz -xvf "fileName"')
     ````
-   
-#### Generate yourself
 
-Comming soon...
+#### Generate yourself 
+
+- For testing a model
+
+   ```shell
+   for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+      python python/niantic/datasets/dataset_7Scenes_multi.py \
+        "${SCENE}" \
+        "test" \
+        --data-path "${SEVENSCENES}" \
+        --graph-data-path "${SEVENSCENESRW}" \
+        --seq-len 8 \
+        --sampling-period 5 \
+        --gpu 0
+   done
+   ```
+
+- For training a multi-scene model (Table 1. in paper)
+
+   ```shell
+   python python/niantic/datasets/dataset_7Scenes_multi.py \
+     multi \
+     "train" \
+     --data-path "${SEVENSCENES}" \
+     --graph-data-path "${SEVENSCENESRW}" \
+     --seq-len 8 \
+     --sampling-period 5 \
+     --gpu 0
+   ```
+
+- For training a single-scene model (Table 1. in supplementary)
+
+   ```shell
+   for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+      python python/niantic/datasets/dataset_7Scenes_multi.py \
+        "${SCENE}" \
+        train \
+        --data-path "${SEVENSCENES}" \
+        --graph-data-path "${SEVENSCENESRW}" \
+        --seq-len 8 \
+        --sampling-period 5 \
+        --gpu 0
+   done
+   ```
    
 ### Evaluation
 
@@ -246,9 +319,9 @@ Comming soon...
 
 3. Download pre-trained models trained with 7-Scenes' 6 training scenes (Table 2 in the paper)
    
-   comming soon
+   Coming soon...
 
-4. Evaluate each model on a correponding remaining scene
+4. Evaluate each model on a corresponding remaining scene
    ```shell
    conda activate relpose_gnn
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
