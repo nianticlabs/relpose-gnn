@@ -218,10 +218,7 @@ export PYTHONPATH="${RELPOSEGNN}:${RELPOSEGNN}/python:${PYTHONPATH}"
    
 #### Generate yourself
 
-1. 7-Scenes traininig
-```shell
-CUDA_VISIBLE_DEVICES=0 python python/niantic/training/train_7Scenes.py --experiment 0 --test_scene multi --seed 400
-````
+Comming soon...
    
 ### Evaluation
 
@@ -247,7 +244,37 @@ CUDA_VISIBLE_DEVICES=0 python python/niantic/training/train_7Scenes.py --experim
    done
    ```
 
+### Train yourself
+1. 7 scenes trainig (Table 1 in the paper)
+    ```shell
+    python python/niantic/training/train_7Scenes.py --experiment 0 --test_scene multi --seed 400
+    ````
 
+2. 6 scenes trainig (Table 2 in the paper)
+   ```shell
+   conda activate relpose_gnn
+   for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+      python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+        --dataset-dir "${SEVENSCENES}" \
+        --test-data-dir "${SEVENSCENESRW}" \
+        --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
+        --save-dir "${DATADIR}" \
+        --gpu 0 \
+        --test-scene "${SCENE}"
+   done
+
+3. Single scene trainig (Table 1 in the supp.)
+   ```shell
+   conda activate relpose_gnn
+   for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+      python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+        --dataset-dir "${SEVENSCENES}" \
+        --test-data-dir "${SEVENSCENESRW}" \
+        --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
+        --save-dir "${DATADIR}" \
+        --gpu 0 \
+        --test-scene "${SCENE}"
+   done
 ## 🤝 Acknowledgements
 
 We would like to thank Galen Han for his extensive help with this project.  
