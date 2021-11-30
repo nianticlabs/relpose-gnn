@@ -250,10 +250,12 @@ Comming soon...
     conda activate relpose_gnn
     python -u ${RELPOSEGNN}/python/niantic/training/train.py \
     --dataset-dir "${SEVENSCENES}" \
+    --train-data-dir "${SEVENSCENESRW}" \
     --test-data-dir "${SEVENSCENESRW}" \
     --save-dir "${DATADIR}" \
     --gpu 0 \
-    --test-scene "${SCENE}"
+    --experiment 0 \
+    --test-scene multi
     ````
 
 2. 6 scenes trainig (Table 2 in the paper)
@@ -262,9 +264,11 @@ Comming soon...
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
       python -u ${RELPOSEGNN}/python/niantic/training/train.py \
         --dataset-dir "${SEVENSCENES}" \
+        --train-data-dir "${SEVENSCENESRW}" \
         --test-data-dir "${SEVENSCENESRW}" \
         --save-dir "${DATADIR}" \
         --gpu 0 \
+        --experiment 1 \
         --test-scene "${SCENE}"
    done
 
@@ -274,11 +278,17 @@ Comming soon...
    for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
       python -u ${RELPOSEGNN}/python/niantic/training/train.py \
         --dataset-dir "${SEVENSCENES}" \
+        --train-data-dir "${SEVENSCENESRW}" \
         --test-data-dir "${SEVENSCENESRW}" \
         --save-dir "${DATADIR}" \
         --gpu 0 \
-        --test-scene "${SCENE}"
+        --experiment 2 \
+        --train_scene "${SCENE}" \
+        --test-scene "${SCENE}" \
+        --max-epoch 100
    done
+   
+   
 ## 🤝 Acknowledgements
 
 We would like to thank Galen Han for his extensive help with this project.  
