@@ -244,8 +244,10 @@ Comming soon...
    done
    ```
 
-3. Download pre-trained models trained with 7-Scenes' 6 traing scenes (Table 2 in the paper)
-    comming soon
+3. Download pre-trained models trained with 7-Scenes' 6 training scenes (Table 2 in the paper)
+   
+   comming soon
+
 4. Evaluate each model on a correponding remaining scene
    ```shell
    conda activate relpose_gnn
