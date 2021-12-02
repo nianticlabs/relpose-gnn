@@ -217,10 +217,10 @@ You'll need preprocessed `.bin` files (`train_frames.bin`, `test_frames.bin`) fo
 
 ### III. Graph generation
 
-Before starting training the model, train and test graphs should be generated to speed up
+Before starting to train the model, train and test graphs should be generated to speed up
 the dataloaders, and not have to run NN search during training.
 
-#### Pre-processed
+#### III.A. Pre-processed
 
 1. Download
  
@@ -248,7 +248,7 @@ the dataloaders, and not have to run NN search during training.
      find "${SEVENSCENESRW}" -mindepth 1 -maxdepth 1 -name "*.tar" | xargs -P 7 -I fileName sh -c 'tar -I pigz -xvf "fileName"')
     ````
 
-#### Generate yourself 
+#### III.B. Generate yourself 
 
 - For testing a model
 
