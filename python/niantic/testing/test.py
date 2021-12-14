@@ -22,7 +22,7 @@ from torchvision import models
 from tqdm import tqdm
 
 # extend PYTHONPATH
-p_parent = Path(__file__).parent
+p_parent = Path(__file__).parent.resolve()
 p_python = str(Path(*p_parent.parts[:p_parent.parts.index('niantic')]))
 if p_python not in sys.path:
     sys.path.insert(0, p_python)
