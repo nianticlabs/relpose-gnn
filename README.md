@@ -318,7 +318,11 @@ the dataloaders, and not have to run NN search during training.
 
 3. Download pre-trained models trained with 7-Scenes' 6 training scenes (Table 2 in the paper)
    
-   Coming soon...
+   ```shell
+   wget \
+    -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/models/6Scenes_${SCENE}_epoch_039.pth.tar" \
+    -O "${DATADIR}/6Scenes_${SCENE}_epoch_039.pth.tar"
+   ```
 
 4. Evaluate each model on a corresponding remaining scene
    ```shell
