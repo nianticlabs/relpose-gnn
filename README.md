@@ -330,7 +330,27 @@ the dataloaders, and not have to run NN search during training.
       python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
         --dataset-dir "${SEVENSCENES}" \
         --test-data-dir "${SEVENSCENESRW}" \
-        --weights "${DATADIR}/relpose_gnn__generalization_${SCENE}_39.pth.tar" \
+        --weights "${DATADIR}/6Scenes_${SCENE}_epoch_039.pth.tar" \
+        --save-dir "${DATADIR}" \
+        --gpu 0 \
+        --test-scene "${SCENE}"
+   done
+   ```
+5. Download pre-trained models trained with 7-Scenes' single training scene (Table 1. in the supp.)
+   
+   ```shell
+   wget \
+    -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/models/1Scenes_${SCENE}_epoch_039.pth.tar" \
+    -O "${DATADIR}/1Scenes_${SCENE}_epoch_039.pth.tar"
+   ```
+
+6. Evaluate each model on the same scene
+   ```shell
+   for SCENE in "chess" "fire" "heads" "office" "pumpkin" "redkitchen" "stairs"; do
+      python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+        --dataset-dir "${SEVENSCENES}" \
+        --test-data-dir "${SEVENSCENESRW}" \
+        --weights "${DATADIR}/1Scenes_${SCENE}_epoch_039.pth.tar" \
         --save-dir "${DATADIR}" \
         --gpu 0 \
         --test-scene "${SCENE}"
