@@ -7,7 +7,12 @@
 [Gabriel J. Brostow](http://www0.cs.ucl.ac.uk/staff/G.Brostow/),
 [Áron Monszpart](http://aron.monszp.art) - **3DV 2021**.
 
-[Link to paper on ArXiv](https://arxiv.org/abs/2104.02538)
+[ \[Paper on ArXiv\] ](https://arxiv.org/abs/2104.02538)
+[ \[Paper on IEEE Explore\] ](https://ieeexplore.ieee.org/abstract/document/9665967)
+[ \[Presentation (long)\] ](https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/RelPoseGNN_3DV21_long.pdf)
+[ \[Presentation (short)\] ](https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/RelPoseGNN_3DV21_short.pdf)
+[ \[Poster\] ](https://github.com/nianticlabs/relpose-gnn/raw/assets/assets/RelPoseGNN_3DV21_poster.pdf)
+
 
 ## 🌌 Overview
 
