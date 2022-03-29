@@ -100,7 +100,7 @@ class MultiModelTrainer:
         test_dataset_list = list()
 
         for s in self.training_scenes:
-            train_data_file = args.test_data_dir + s + '_fc8_sp5_train'
+            train_data_file = args.train_data_dir + s + '_fc8_sp5_train'
             train_dataset_list.append( SEVEN_SCENES_multi(
                 root=f'{train_data_file}',
                 seqs=[], train=True, database_set='train', seq_len=self.seq_len,
