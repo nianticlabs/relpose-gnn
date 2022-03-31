@@ -241,14 +241,14 @@ class MultiModelTrainer:
                     pred_R.view(1, pred_R.size(0), pred_R.size(1)),
                     target_R.view(1, target_R.size(0), target_R.size(1)))
 
-                loss_total = loss_R
+                loss_total = loss_R[0]
             else:
                 pred = self.model(data.to(self.device))
 
                 loss = self.train_criterion(pred.view(1, pred.size(0), pred.size(1)),
                                             target.view(1, target.size(0), target.size(1)))
 
-                loss_total = loss
+                loss_total = loss[0]
 
             loss_total.backward()
             self.optimizer.step()
