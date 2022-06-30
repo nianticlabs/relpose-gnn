@@ -407,12 +407,12 @@ the dataloaders, and not have to run NN search during training.
 ## Reproducing results: Cambridge Landmarks
 
 
-### III. Graph generation
+### Graph generation
 
 Before starting to train the model, train and test graphs should be generated to speed up
 the dataloaders, and not have to run NN search during training.
 
-#### III.A. Pre-processed
+#### A. Pre-processed
 
 1. Download
  
