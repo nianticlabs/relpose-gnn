@@ -143,7 +143,7 @@ If you find our work useful or interesting, please cite our paper:
 }
 ```
 
-## Reproducing results
+## Reproducing results: 7-Scenes
 
 ### Source code
 
@@ -402,6 +402,86 @@ the dataloaders, and not have to run NN search during training.
         --test-scene "${SCENE}" \
         --max-epoch 100
    done
+
+
+## Reproducing results: Cambridge Landmarks
+
+
+### III. Graph generation
+
+Before starting to train the model, train and test graphs should be generated to speed up
+the dataloaders, and not have to run NN search during training.
+
+#### III.A. Pre-processed
+
+1. Download
+ 
+    - Test
+       ```shell
+       mkdir -p "${CAMBRIDGERW}" || (mkdir -p "${CAMBRIDGERW}" && chmod go+w -R "${CAMBRIDGERW}")
+       for SCENE in "KingsCollege", "OldHospital", "StMarysChurch", "ShopFacade", "GreatCourt"; do
+         wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp3_test.tar" \
+              -O "${CAMBRIDGERW}/${SCENE}_fc8_sp3_test.tar"
+       done
+       ```
+      
+   - Train
+      ```shell
+      for SCENE in "KingsCollege", "OldHospital", "StMarysChurch", "ShopFacade", "GreatCourt"; do
+        wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp3_train.tar" \
+             -O "${CAMBRIDGERW}/${SCENE}_fc8_sp3_train.tar"
+      done
+      ```
+
+2. Extract
+
+    ```shell
+    (cd "${CAMBRIDGERW}"; \
+     find "${CAMBRIDGERW}" -mindepth 1 -maxdepth 1 -name "*.tar" | xargs -P 7 -I fileName sh -c 'tar -I pigz -xvf "fileName"')
+    ````
+    
+
+### Evaluation
+
+#### Pre-trained
+
+1. Download pre-trained model trained with entire Cambridge training scenes (Table 3 in the paper)
+   ```shell
+   wget \
+    -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/models/relpose_gnn__multi_39.pth.tar" \
+    -O "${DATADIR}/relpose_gnn__multi_39.pth.tar"
+   ```
+2. Evaluate on each Cambridge test scene 
+   ```shell
+   for SCENE in "KingsCollege", "OldHospital", "StMarysChurch", "ShopFacade", "GreatCourt"; do
+      python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
+        --dataset-dir "${CAMBRIDGE}" \
+        --test-data-dir "${CAMBRIDGERW}" \
+        --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
+        --save-dir "${DATADIR}" \
+        --gpu 0 \
+        --test-scene "${SCENE}"
+   done
+   ```
+
+
+### Train yourself
+1. Cambridge training (Table 3 in the paper)
+    ```shell
+    python -u ${RELPOSEGNN}/python/niantic/training/train.py \
+      --dataset-dir "${CAMBRIDGE}" \
+      --train-data-dir "${CAMBRIDGERW}" \
+      --test-data-dir "${CAMBRIDGERW}" \
+      --save-dir "${DATADIR}" \
+      --gpu 0 \
+      --experiment 0 \
+      --test-scene multi
+    ````
+    
+    
+    
+ 
+
    
    
 ## 🤝 Acknowledgements
