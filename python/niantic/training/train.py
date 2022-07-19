@@ -1,6 +1,7 @@
 """
 Example call:
    python -u ${RELPOSEGNN}/python/niantic/training/train.py \
+    --dataset Cambridge \
     --dataset-dir "${SEVENSCENES}" \
     --train-data-dir "${SEVENSCENESRW}" \
     --test-data-dir "${SEVENSCENESRW}" \
@@ -18,9 +19,9 @@ import random
 import numpy as np
 import torch
 from loguru import logger
-from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import random_split, Subset, ConcatDataset
-from torch_geometric.loader import DataLoader
+#from torch_geometric.loader import DataLoader
+from torch_geometric.data import DataLoader
 from torchvision import models
 from tqdm import tqdm
 
@@ -31,6 +32,7 @@ if p_python not in sys.path:
     sys.path.insert(0, p_python)
 
 from niantic.datasets.dataset_7Scenes_multi import SEVEN_SCENES_multi
+from niantic.datasets.dataset_Cambridge_multi import CAMBRIDGE_multi
 from niantic.modules.criterion import PoseNetCriterion
 from niantic.modules.posenet import PoseNetX_LIGHT_KNN, PoseNetX_R2
 from niantic.utils.utils import save_checkpoint
@@ -57,9 +59,9 @@ class MultiModelTrainer:
         self.test_seq_len = 8
         self.use_VO_loss = True
         self.use_VO_model = True
-        self.lr = 5e-5  # initial LR
+        self.lr = args.lr  # initial LR
         self.lr_decay = 0.1 # learning rate decay factor le:=lr/lr_decay
-        self.lr_decay_step = 20 # number of batch for decay
+        self.lr_decay_step = args.lr_decay_step # number of batch for decay
         self.weight_decay = 0.0005 # L2 reg
         self.sax = 0.0  # initial absolute translation coeff
         self.saq = args.saq  # initial absolute rotation coeff
@@ -81,41 +83,51 @@ class MultiModelTrainer:
             else ('cuda' if torch.cuda.is_available() else 'cpu')
 
         # Define datasets and dataloaders
-        #Training datasets
+        # Training datasets
         if self.experiment == 0 and args.dataset == '7Scenes':
-            self.training_scenes = ['heads','chess','redkitchen','pumpkin','office', 'fire','stairs']
+            self.training_scenes = ['heads', 'chess', 'redkitchen', 'pumpkin', 'office', 'fire', 'stairs']
         elif self.experiment == 1 and args.dataset == '7Scenes':
-            self.training_scenes = ['heads','chess','redkitchen','pumpkin','office', 'fire','stairs']
+            self.training_scenes = ['heads', 'chess', 'redkitchen', 'pumpkin', 'office', 'fire', 'stairs']
             self.training_scenes.remove(args.test_scene)
-        elif self.experiment == 2 and args.dataset == '7Scenes':
+        elif self.experiment == 0 and args.dataset == 'Cambridge':
+            self.training_scenes = ['KingsCollege', 'OldHospital', 'StMarysChurch', 'ShopFacade', 'GreatCourt']
+        elif self.experiment == 1 and args.dataset == 'Cambridge':
+            self.training_scenes = ['KingsCollege', 'OldHospital', 'StMarysChurch', 'ShopFacade', 'GreatCourt']
+            self.training_scenes.remove(args.test_scene)
+        elif self.experiment == 2:
             self.training_scenes = [args.train_scene]
 
-        #Test datasets
+        # Test datasets
         if args.test_scene == 'multi' and args.dataset == '7Scenes':
-            self.test_scenes = ['heads','chess','redkitchen','pumpkin','office', 'fire','stairs']
-        elif args.dataset == '7Scenes':
+            self.test_scenes = ['heads', 'chess', 'redkitchen', 'pumpkin', 'office', 'fire', 'stairs']
+        elif args.test_scene == 'multi' and args.dataset == 'Cambridge':
+            self.test_scenes = ['KingsCollege', 'OldHospital', 'StMarysChurch', 'ShopFacade', 'GreatCourt']
+        else:
             self.test_scenes = [args.test_scene]
 
         train_dataset_list = list()
         test_dataset_list = list()
 
+        # Striding sampling factor: Cambridge:3, 7-Scenes:5
+        sp = 3 if args.dataset == 'Cambridge' else 5
+        dataset_loader = CAMBRIDGE_multi if args.dataset == 'Cambridge' else SEVEN_SCENES_multi
+
         for s in self.training_scenes:
-            train_data_file = args.train_data_dir + s + '_fc8_sp5_train'
-            train_dataset_list.append( SEVEN_SCENES_multi(
+            train_data_file = args.train_data_dir + s + '_fc8_sp{}_train'.format(sp)
+            train_dataset_list.append(dataset_loader(
                 root=f'{train_data_file}',
                 seqs=[], train=True, database_set='train', seq_len=self.seq_len,
-                graph_structure='fc', excluded_scenes=None, device_id=args.gpu))
+                graph_structure='fc', device_id=args.gpu))
 
         for s in self.test_scenes:
-            test_data_file = args.test_data_dir + s + '_fc8_sp5_test'
-            test_dataset_list.append( SEVEN_SCENES_multi(
+            test_data_file = args.test_data_dir + s + '_fc8_sp{}_test'.format(sp)
+            test_dataset_list.append(dataset_loader(
                 root=f'{test_data_file}',
                 seqs=[s], train=False, database_set='train', seq_len=self.test_seq_len,
-                graph_structure='fc', device_id=args.gpu) )
+                graph_structure='fc', device_id=args.gpu))
 
         self.train_dataset = ConcatDataset(train_dataset_list)
         self.test_dataset_list = test_dataset_list
-
 
         self.train_loader = \
             DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True,
@@ -125,6 +137,11 @@ class MultiModelTrainer:
         self.num_nodes, self.feat_dim = x.size()
         self.img_W = int(self.feat_dim / (3 * self.img_H))
         self.max_num_iter = len(self.train_dataset) // self.batch_size
+        self.pose_stat_file =  osp.join(args.pose_stat_path, f'{self.dataset}_pose_stats.txt')
+        if args.dataset == 'Cambridge' and self.pose_stat_file != None:
+            self.pose_m, self.pose_s = np.loadtxt(self.pose_stat_file)  # mean and stdev
+        else:
+            self.pose_m, self.pose_s = np.array([0,0,0]), np.array([1,1,1]) # mean and stdev
 
         logger.info(f'Experiment name: {self.exp_name}')
         logger.info(f'Dataset: {self.dataset}')
@@ -132,6 +149,7 @@ class MultiModelTrainer:
         logger.info(f'Test scene: {self.test_scene}')
         logger.info(f'Train data dir: {self.train_data_dir}')
         logger.info(f'Test data dir: {self.test_data_dir}')
+        logger.info(f'Pose statistics file path: {self.pose_stat_file}')
         logger.info(f'Train dataset size: {len(self.train_dataset)}')
         logger.info(f'batch_size: {self.batch_size}')
         logger.info(f'Images sizes: {self.img_H}, {self.img_W}')
@@ -149,23 +167,24 @@ class MultiModelTrainer:
         logger.info(f'droprate: {args.droprate}')
         logger.info(f'gpu: {args.gpu}')
         logger.info(f'seed: {args.seed}')
+        logger.info(f'knn: {args.knn}')
 
         # Define model
         self.feature_extractor = models.resnet34(pretrained=True)
         if self.model_name == 'R1' or self.model_name == 'light_knn':
             self.model = PoseNetX_LIGHT_KNN(
                 feature_extractor=self.feature_extractor, droprate=args.droprate, pretrained=True,
-                use_gnn=self.graph_structure != 'ind', knn=-1).to(self.device)
+                use_gnn=self.graph_structure != 'ind', knn=args.knn).to(self.device)
         elif self.model_name == 'R2':
             self.model = PoseNetX_R2(
                 feature_extractor=self.feature_extractor, droprate=args.droprate, pretrained=True,
-                use_gnn=self.graph_structure != 'ind', knn=-1, gnn_recursion=self.gnn_recursion) \
+                use_gnn=self.graph_structure != 'ind', knn=args.knn, gnn_recursion=self.gnn_recursion) \
                 .to(self.device)
         elif self.model_name == 'R3':
             self.model = PoseNetX_R2(
                 self.feature_extractor, droprate=args.droprate, pretrained=True,
                 use_gnn=self.graph_structure != 'ind',
-                knn=-1, gnn_recursion=self.gnn_recursion, feat_dim=2048, edge_feat_dim=2048,
+                knn=args.knn, gnn_recursion=self.gnn_recursion, feat_dim=2048, edge_feat_dim=2048,
                 node_dim=2048) \
                 .to(self.device)
 
@@ -224,7 +243,8 @@ class MultiModelTrainer:
             surviving_edges = surviving_edges.tolist()
             # if len(surviving_edges) <data.edge_index.shape[1]:
             #     data.edge_index = data.edge_index[:,surviving_edges]
-            data.edge_attr = data.edge_attr[surviving_edges, :]
+            if self.dataset=='7Scenes':
+                data.edge_attr = data.edge_attr[surviving_edges, :]
             # ----------------------------------------------------
 
             target = data.y
@@ -298,6 +318,10 @@ class MultiModelTrainer:
             q = [qexp(p[3:]) for p in target]
             target = np.hstack((target[:, :3], np.asarray(q)))
 
+            # un-normalize the predicted and target translations
+            output[:, :3] = (output[:, :3] * self.pose_s) + self.pose_m
+            target[:, :3] = (target[:, :3] * self.pose_s) + self.pose_m
+
             # take the first prediction
             pred_poses[batch_idx, :] = output[0]
             targ_poses[batch_idx, :] = target[0]
@@ -326,38 +350,44 @@ def _parse_args(argv):
     parser = argparse.ArgumentParser('')
     parser.add_argument('--experiment', type=int,
                         help='Type of experiment (multi-scene training:0, leave-one-out:1, single-scene training:2)', default=0)
-    parser.add_argument('--dataset', type=str, help='Name of dataset', default='7Scenes')
+    parser.add_argument('--dataset', type=str, help='Name of dataset: 7Scenes, Cambridge', default='Cambridge')
     parser.add_argument('--train-scene', type=str, help='Name of sequence used for training', default='multi')
     parser.add_argument('--test-scene', type=str, help='Which scene to test on', default='multi')
     parser.add_argument('--train-data-dir', type=str, help='Path to train/test data',
-                        default='/mnt/data-7scenes-ozgur/3dv/data/seven_scenes/')
+                            default='/mnt/data-7scenes-ozgur/mozgur/3dv/Cambridge/')
     parser.add_argument('--test-data-dir', type=str, help='Path to train/test data',
-                        default='/mnt/data-7scenes-ozgur/3dv/data/seven_scenes/')
-    parser.add_argument('--save-dir', type=str, help='Path to output data', default='/mnt/data-7scenes-ozgur/mozgur/3dv')
+                        default='/mnt/data-7scenes-ozgur/mozgur/3dv/Cambridge/')
+    parser.add_argument('--save-dir', type=str, help='Path to output data',
+                        default='/mnt/data-7scenes-ozgur/mozgur/3dv_final/outputs')
     parser.add_argument('--save-model', type=bool, help='Wheather a checkpoint is saved or not', default=True)
     parser.add_argument('--weights-filename', type=str, help='Weight file name for pre-trained model', default='')
+    parser.add_argument('--pose-stat-path', type=str,default='/home/mozgur/relpose-gnn/data/Cambridge/',
+                        help='Path to pose statistics file (.txt) for Cambridge, set to "None" for 7Scenes')
     parser.add_argument('--model-name', type=str, help='Name of the model (R1, R2, R3)', default='R3')
-    parser.add_argument('--srq', type=int, help='Relative rotation loss weight coefficient', default=-3)
-    parser.add_argument('--saq', type=int, help='Absolute rotation loss weight coefficient', default=-3)
+    parser.add_argument('--srq', type=int, help='Relative rotation loss weight coefficient', default=-2)
+    parser.add_argument('--saq', type=int, help='Absolute rotation loss weight coefficient', default=-2)
     parser.add_argument('--droprate', type=float, help='Droprate', default=0.5)
-    parser.add_argument('--gnn-recursion', type=int, help='Number of GNN layers', default=3)
+    parser.add_argument('--gnn-recursion', type=int, help='Number of GNN layers', default=2)
     parser.add_argument('--lambda-AP', dest='lambda_AP', type=float, help='Absolute pose weight coeff', default=0.0)
-    parser.add_argument('--max-epoch', type=int, help='Number of epochs', default=41)
+    parser.add_argument('--max-epoch', type=int, help='Number of epochs', default=200)
     parser.add_argument('--num-workers', type=int, help='Number of dataloader workers', default=8)
-    parser.add_argument('--gpu', default=None, help='GpuId', type=int)
+    parser.add_argument('--gpu', default=0, help='GpuId', type=int)
     parser.add_argument('--exp-name', default=None, help='experiment name', type=str)
-    parser.add_argument('--seed', default=999, help='random seed', type=int)
+    parser.add_argument('--seed', default=0, help='random seed', type=int)
+    parser.add_argument('--knn', default=4, help='knn', type=int)
+    parser.add_argument('--lr', default=0.0001, help='initial learning rate', type=float)
+    parser.add_argument('--lr-decay-step', default=50, help='learnig rate decay step', type=int)
 
     args = parser.parse_args(argv)
     if not hasattr(args, 'saq') or args.saq is None:
         setattr(args, 'saq', args.srq)
     if not hasattr(args, 'exp_name') or args.exp_name is None:
         if args.experiment == 2:
-            setattr(args, 'exp_name', f'single_w_{args.train_scene}_w_test_{args.test_scene}_seed_{str(args.seed)}')
+            setattr(args, 'exp_name', f'{args.dataset}_single_w_{args.train_scene}_w_test_{args.test_scene}_seed_{str(args.seed)}')
         elif args.experiment == 1:
-            setattr(args, 'exp_name', f'multi_wo_{args.test_scene}_w_test_{args.test_scene}_seed_{str(args.seed)}')
+            setattr(args, 'exp_name', f'{args.dataset}_multi_wo_{args.test_scene}_w_test_{args.test_scene}_seed_{str(args.seed)}')
         else:
-            setattr(args, 'exp_name', f'multi_w_test_{args.test_scene}_seed_{str(args.seed)}')
+            setattr(args, 'exp_name', f'{args.dataset}_multi_w_test_{args.test_scene}_seed_{str(args.seed)}')
 
     return args
 
@@ -388,8 +418,11 @@ def main(argv, metrics_callback=None):
     for epoch in tqdm(range(args.max_epoch), desc='epoch', total=args.max_epoch):
         model_multi_trainer.train(epoch=epoch)
 
-        if epoch > 20:
-            if args.save_model:
+        if epoch > 100:
+            median_ts = list()
+            median_qs = list()
+
+            if args.save_model and (epoch==149 or epoch==199):
                 save_checkpoint(
                     logdir=str(logdir),
                     epoch=epoch, model=model_multi_trainer.model,
@@ -402,10 +435,25 @@ def main(argv, metrics_callback=None):
                     ref_node=0, epoch=epoch,
                     scene=model_multi_trainer.test_scenes[j])
 
+                median_ts.append(cur_median_t)
+                median_qs.append(cur_median_q)
+
                 if cur_median_t < best_median_ts[j]:
                     best_median_ts[j] = cur_median_t
                 if cur_median_q < best_median_qs[j]:
                     best_median_qs[j] = cur_median_q
+
+            avg_mediam_t4 = np.mean(median_ts[:-1])
+            avg_mediam_t5 = np.mean(median_ts)
+            avg_median_q4 = np.mean(median_qs[:-1])
+            avg_median_q5 = np.mean(median_qs)
+
+            logger.info(f'[Average, Epoch {epoch:04d}] Error in translation:'
+                        f' median_4 {avg_mediam_t4:3.2f} m,'
+                        f' median_5 {avg_mediam_t5:3.2f} m'
+                        f'\tError in rotation:'
+                        f' median_4 {avg_median_q4:3.2f} degrees,'
+                        f' median_5 {avg_median_q5:3.2f} degrees')
 
     return best_median_ts, best_median_qs
 
