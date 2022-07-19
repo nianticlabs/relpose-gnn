@@ -293,7 +293,7 @@ def _parse_args(argv):
                         default='/mnt/disks/data-7scenes/7scenes/')
     parser.add_argument('--test-data-dir', type=str, help='Path to test data',
                         default='/mnt/data-7scenes-ozgur/mozgur/3dv/Cambridge/')
-    parser.add_argument('--pose-stat-path', type=str, help='Path to pose statistics file (.txt)',
+    parser.add_argument('--pose-stat-path', type=str, help='Path to pose statistics file (.txt) for Cambridge, set to "None" for 7Scenes',
                         default='/home/mozgur/relpose-gnn/data/Cambridge/')
     parser.add_argument('--weights', type=Path, help='Weight file name for pre-trained model',
                         default='epoch_149.pth.tar')
