@@ -45,8 +45,8 @@ def save_poses(pred_poses: np.ndarray, rel_paths: list, p_output: Path, target_p
 class MultiModelTrainer:
     def __init__(self, args):
         # ---------Hyperparameters-------
-        self.dataset = args.dataset  # '7scenes'
-        self.test_scene = args.test_scene  # heads
+        self.dataset = args.dataset  # e.g '7scenes'
+        self.test_scene = args.test_scene  # e.g  'heads'
         self.test_data_dir = args.test_data_dir
         assert Path(self.test_data_dir).exists(), self.test_data_dir
         if hasattr(args, 'dataset_dir'):
