@@ -13,6 +13,7 @@ import random
 import re
 import sys
 from pathlib import Path
+import os.path as osp
 
 import numpy as np
 import torch
@@ -28,8 +29,9 @@ if p_python not in sys.path:
     sys.path.insert(0, p_python)
 
 from niantic.datasets.dataset_7Scenes_multi import SEVEN_SCENES_multi
+from niantic.datasets.dataset_Cambridge_multi import CAMBRIDGE_multi
 from niantic.modules.criterion import PoseNetCriterion
-from niantic.modules.posenet import PoseNetX_R2
+from niantic.modules.posenet import PoseNetX_LIGHT_KNN, PoseNetX_R2
 from niantic.utils.pose_utils import quaternion_angular_error, qexp
 
 
@@ -50,6 +52,7 @@ class MultiModelTrainer:
         if hasattr(args, 'dataset_dir'):
             self.dataset_dir = args.dataset_dir
         self.save_dir = args.save_dir
+        self.model_name = args.model_name
         self.img_H = 256  # input image height
         # self.batch_size = 8
         self.graph_structure = 'fc'
@@ -77,20 +80,25 @@ class MultiModelTrainer:
             else ('cuda' if torch.cuda.is_available() else 'cpu')
 
         # Define datasets and dataloaders
-        if args.test_scene == 'multi' and args.dataset.lower() == '7scenes':
+        if args.test_scene == 'multi' and args.dataset == '7Scenes':
             self.test_scenes = ['heads', 'chess', 'redkitchen', 'pumpkin', 'office', 'fire', 'stairs']
+        elif args.test_scene == 'multi' and args.dataset == 'Cambridge':
+            self.test_scenes = ['KingsCollege', 'OldHospital', 'StMarysChurch', 'ShopFacade', 'GreatCourt']
         else:
             self.test_scenes = [args.test_scene]
+
+        sp = 3 if args.dataset == 'Cambridge' else 5
+        dataset_loader = CAMBRIDGE_multi if args.dataset == 'Cambridge' else SEVEN_SCENES_multi
 
         filenames = []
         test_dataset_list = list()
         for s in self.test_scenes:
-            test_data_file = str(Path(args.test_data_dir) / f'{s}_fc8_sp5_test')
-            test_dataset_list.append(SEVEN_SCENES_multi(
+            test_data_file = str(Path(args.test_data_dir) / f'{s}_fc8_sp{sp}_test'.format(s,sp))
+            test_dataset_list.append(dataset_loader(
                 root=f'{test_data_file}',
                 seqs=[s], train=False, database_set='train', seq_len=self.test_seq_len,
                 graph_structure='fc', device_id=args.gpu))
-            if getattr(args, 'dataset_dir'):
+            if args.dataset == '7Scenes' and getattr(args, 'dataset_dir'):
                 p_test_split = Path(args.dataset_dir) / s / 'TestSplit.txt'
                 with p_test_split.open('r') as f:
                     for line in f.readlines():
@@ -104,7 +112,7 @@ class MultiModelTrainer:
 
         self.test_dataset_list = test_dataset_list
         self.test_dataset_filenames = filenames
-        if sum(len(d) for d in self.test_dataset_list) != len(self.test_dataset_filenames):
+        if args.dataset == '7Scenes' and sum(len(d) for d in self.test_dataset_list) != len(self.test_dataset_filenames):
             msg = f'Not the same number of filenames as test graph files!' \
                   f'{self.test_dataset_list} ({sum(len(d) for d in self.test_dataset_list)})\n' \
                   f'!=\n' \
@@ -115,6 +123,12 @@ class MultiModelTrainer:
         x = self.test_dataset_list[0][0].x
         self.num_nodes, self.feat_dim = x.size()
         self.img_W = int(self.feat_dim / (3 * self.img_H))
+        self.pose_stat_file = osp.join(args.pose_stat_path, f'{self.dataset}_pose_stats.txt')
+        if args.dataset == 'Cambridge' and self.pose_stat_file != None:
+            self.pose_m, self.pose_s = np.loadtxt(self.pose_stat_file)  # mean and stdev
+        else:
+            self.pose_m, self.pose_s = np.array([0,0,0]), np.array([1,1,1]) # mean and stdev
+
 
         logger.info(f'Dataset: {self.dataset}')
         logger.info(f'Test scene: {self.test_scene}')
@@ -135,12 +149,22 @@ class MultiModelTrainer:
 
         # Define model
         self.feature_extractor = models.resnet34(pretrained=True)
-        self.model = PoseNetX_R2(
-            self.feature_extractor, droprate=args.droprate, pretrained=True,
-            use_gnn=self.graph_structure != 'ind',
-            knn=-1, gnn_recursion=self.gnn_recursion, feat_dim=2048, edge_feat_dim=2048,
-            node_dim=2048, L=2) \
-            .to(self.device)
+        if self.model_name == 'R1' or self.model_name == 'light_knn':
+            self.model = PoseNetX_LIGHT_KNN(
+                feature_extractor=self.feature_extractor, droprate=args.droprate, pretrained=True,
+                use_gnn=self.graph_structure != 'ind', knn=args.knn).to(self.device)
+        elif self.model_name == 'R2':
+            self.model = PoseNetX_R2(
+                feature_extractor=self.feature_extractor, droprate=args.droprate, pretrained=True,
+                use_gnn=self.graph_structure != 'ind', knn=args.knn, gnn_recursion=self.gnn_recursion) \
+                .to(self.device)
+        elif self.model_name == 'R3':
+            self.model = PoseNetX_R2(
+                self.feature_extractor, droprate=args.droprate, pretrained=True,
+                use_gnn=self.graph_structure != 'ind',
+                knn=args.knn, gnn_recursion=self.gnn_recursion, feat_dim=2048, edge_feat_dim=2048,
+                node_dim=2048) \
+                .to(self.device)
 
         self.model_parameters = filter(lambda p: p.requires_grad, self.model.parameters())
         self.params = sum([np.prod(p.size()) for p in self.model_parameters])
@@ -214,6 +238,10 @@ class MultiModelTrainer:
             q = tuple(qexp(p[3:]) for p in target)
             target = np.hstack((target[:, :3], np.asarray(q)))
 
+            # un-normalize the predicted and target translations
+            output[:, :3] = (output[:, :3] * self.pose_s) + self.pose_m
+            target[:, :3] = (target[:, :3] * self.pose_s) + self.pose_m
+
             for j in range(batch_size_):
                 idx_ = idx * batch_size + j
                 # take the first prediction
@@ -222,11 +250,12 @@ class MultiModelTrainer:
                 assert len(pred_poses) == idx_ + 1, f'len(pred_poses): {len(pred_poses)} != {idx_} idx_'
                 assert len(targ_poses) == idx_ + 1, f'len(targ_poses): {len(targ_poses)} != {idx_} idx_'
 
-                fname = data_set.file_list[idx_]
-                linear_id = int(Path(fname).stem.split('_')[-1])
-                p_rgb = Path(self.test_dataset_filenames[linear_id])
-                p_rel_path = p_rgb.relative_to(self.dataset_dir)
-                rel_paths.append(p_rel_path)
+                if self.dataset == '7Scenes':
+                    fname = data_set.file_list[idx_]
+                    linear_id = int(Path(fname).stem.split('_')[-1])
+                    p_rgb = Path(self.test_dataset_filenames[linear_id])
+                    p_rel_path = p_rgb.relative_to(self.dataset_dir)
+                    rel_paths.append(p_rel_path)
 
         pred_poses = np.array(pred_poses, copy=False)
         targ_poses = np.array(targ_poses, copy=False)
@@ -246,34 +275,40 @@ class MultiModelTrainer:
                     f' median {median_q:3.2f} degrees,'
                     f' mean {np.mean(q_loss):3.2f} degrees')
 
-        postfix = '_'.join(f'{scene}' for scene in self.test_scenes)
-        save_poses(pred_poses=pred_poses, rel_paths=rel_paths,
-                   p_output=Path(
-                       self.save_dir) / f'{weights.stem.split(".")[0]}_{postfix}__{median_t:0.2f}_{median_q:0.1f}.npz',
-                   target_poses=targ_poses
-                   )
+        if self.dataset == '7Scenes':
+            postfix = '_'.join(f'{scene}' for scene in self.test_scenes)
+            save_poses(pred_poses=pred_poses, rel_paths=rel_paths,
+                       p_output=Path(
+                           self.save_dir) / f'{weights.stem.split(".")[0]}_{postfix}__{median_t:0.2f}_{median_q:0.1f}.npz',
+                       target_poses=targ_poses
+                       )
 
         return median_t, np.mean(t_loss), median_q, np.mean(q_loss)
 
 
 def _parse_args(argv):
     parser = argparse.ArgumentParser('')
+    parser.add_argument('--dataset', type=str, help='Name of dataset: 7Scenes, Cambridge', default='Cambridge')
     parser.add_argument('--dataset-dir', type=Path, help='Path to rgb and poses',
                         default='/mnt/disks/data-7scenes/7scenes/')
     parser.add_argument('--test-data-dir', type=str, help='Path to test data',
-                        default='/mnt/data-7scenes-ozgur/3dv/data/seven_scenes/')
+                        default='/mnt/data-7scenes-ozgur/mozgur/3dv/Cambridge/')
+    parser.add_argument('--pose-stat-path', type=str, help='Path to pose statistics file (.txt)',
+                        default='/home/mozgur/relpose-gnn/data/Cambridge/')
     parser.add_argument('--weights', type=Path, help='Weight file name for pre-trained model',
-                        default='relpose_gnn__multi_39.pth.tar')
+                        default='/mnt/data-7scenes-ozgur/mozgur/3dv_final/outputs/Cambridge/multi/avg_seed999_k4_r2_srq0/epoch_149.pth.tar')
     parser.add_argument('--save-dir', type=str, help='Path to output data',
                         default='/mnt/data-7scenes-ozgur/mozgur/3dv')
-    parser.add_argument('--test-scene', type=str, help='Which scene to test on', default='chess')
+    parser.add_argument('--test-scene', type=str, help='Which scene to test on', default='GreatCourt')
     parser.add_argument('--num-workers', type=int, help='Number of dataloader workers', default=8)
-    parser.add_argument('--gnn-recursion', type=int, help='Number of GNN recursions', default=3)
-    parser.add_argument('--dataset', type=str, help='Name of dataset', default='7scenes')
+    parser.add_argument('--model-name', type=str, help='Name of the model (R1, R2, R3)', default='R3')
+    parser.add_argument('--gnn-recursion', type=int, help='Number of GNN recursions', default=2)
     parser.add_argument('--srq', type=int, help='Relative rotation loss weight coefficient', default=-3)
     parser.add_argument('--saq', type=int, help='Absolute rotation loss weight coefficient', default=-3)
+    parser.add_argument('--knn', default=4, help='knn', type=int)
     parser.add_argument('--droprate', type=float, help='Droprate', default=0.5)
     parser.add_argument('--gpu', default=None, help='GpuId', type=int)
+    parser.add_argument('--seed', default=999, help='random seed', type=int)
 
     args = parser.parse_args(argv)
     if not hasattr(args, 'saq') or args.saq is None:
@@ -294,7 +329,7 @@ def seed_everything(seed: int):
 def main(argv, metrics_callback=None):
     args = _parse_args(argv)
 
-    seed_everything(30)
+    seed_everything(args.seed)
     print(f'Seed: {torch.initial_seed()}')
 
     logdir = Path(args.save_dir) / args.dataset.lower() / args.test_scene
@@ -306,7 +341,7 @@ def main(argv, metrics_callback=None):
 
     if 1 < len(model_multi_trainer.test_dataset_list):
         msg = 'Note, that seed does not get reset between datasets!'
-        logger.warn(msg)
+        logger.warning(msg)
         print(msg)
 
     checkpoint = torch.load(args.weights)
