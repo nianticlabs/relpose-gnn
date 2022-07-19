@@ -296,7 +296,7 @@ def _parse_args(argv):
     parser.add_argument('--pose-stat-path', type=str, help='Path to pose statistics file (.txt)',
                         default='/home/mozgur/relpose-gnn/data/Cambridge/')
     parser.add_argument('--weights', type=Path, help='Weight file name for pre-trained model',
-                        default='/mnt/data-7scenes-ozgur/mozgur/3dv_final/outputs/Cambridge/multi/avg_seed999_k4_r2_srq0/epoch_149.pth.tar')
+                        default='epoch_149.pth.tar')
     parser.add_argument('--save-dir', type=str, help='Path to output data',
                         default='/mnt/data-7scenes-ozgur/mozgur/3dv')
     parser.add_argument('--test-scene', type=str, help='Which scene to test on', default='GreatCourt')
