@@ -420,15 +420,15 @@ the dataloaders, and not have to run NN search during training.
        ```shell
        mkdir -p "${CAMBRIDGERW}" || (mkdir -p "${CAMBRIDGERW}" && chmod go+w -R "${CAMBRIDGERW}")
        for SCENE in "KingsCollege", "OldHospital", "StMarysChurch", "ShopFacade", "GreatCourt"; do
-         wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp3_test.tar.gz" \
-              -O "${CAMBRIDGERW}/${SCENE}_fc8_sp3_test.tar.gz"
+         wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp3_test.tar" \
+              -O "${CAMBRIDGERW}/${SCENE}_fc8_sp3_test.tar"
        done
        ```
    - Train
       ```shell
       for SCENE in "KingsCollege", "OldHospital", "StMarysChurch", "ShopFacade", "GreatCourt"; do
-        wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp3_train.tar.gz" \
-             -O "${CAMBRIDGERW}/${SCENE}_fc8_sp3_train.tar.gz"
+        wget -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/data/${SCENE}_fc8_sp3_train.tar" \
+             -O "${CAMBRIDGERW}/${SCENE}_fc8_sp3_train.tar"
       done
       ```
 
@@ -436,7 +436,7 @@ the dataloaders, and not have to run NN search during training.
 
     ```shell
     (cd "${CAMBRIDGERW}"; \
-     find "${CAMBRIDGERW}" -mindepth 1 -maxdepth 1 -name "*.tar.gz" | xargs -P 7 -I fileName sh -c 'tar -I pigz -xvf "fileName"')
+     find "${CAMBRIDGERW}" -mindepth 1 -maxdepth 1 -name "*.tar" | xargs -P 7 -I fileName sh -c 'tar -I pigz -xvf "fileName"')
     ````
     
 
