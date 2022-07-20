@@ -457,7 +457,7 @@ the dataloaders, and not have to run NN search during training.
       python -u ${RELPOSEGNN}/python/niantic/testing/test.py \
         --dataset-dir "${CAMBRIDGE}" \
         --test-data-dir "${CAMBRIDGERW}" \
-        --weights "${DATADIR}/relpose_gnn__multi_39.pth.tar" \
+        --weights "${DATADIR}/relpose_gnn_cambridge_epoch_149.pth.tar" \
         --save-dir "${DATADIR}" \
         --gpu 0 \
         --test-scene "${SCENE}"
