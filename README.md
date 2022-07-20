@@ -448,8 +448,8 @@ the dataloaders, and not have to run NN search during training.
 1. Download pre-trained model trained with entire Cambridge training scenes (Table 3 in the paper)
    ```shell
    wget \
-    -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/models/relpose_gnn__multi_39.pth.tar" \
-    -O "${DATADIR}/relpose_gnn__multi_39.pth.tar"
+    -c "https://storage.googleapis.com/niantic-lon-static/research/relpose-gnn/models/relpose_gnn_cambridge_epoch_149.pth.tar" \
+    -O "${DATADIR}/relpose_gnn_cambridge_epoch_149.pth.tar"
    ```
 2. Evaluate on each Cambridge test scene 
    ```shell
